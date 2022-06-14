@@ -37,6 +37,8 @@ trait SalesTables extends TableExt {
   class OrderTable(tag: Tag) extends Table[Order](tag, "order") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
+    def name = column[String]("name")
+
     def userId = column[Int]("user_id")
 
     def expectedDeliveryDate = column[DateTime]("expected_delivery_date")
@@ -47,6 +49,6 @@ trait SalesTables extends TableExt {
 
     def isDeleted = column[Boolean]("is_deleted")
 
-    def * = (id, userId, expectedDeliveryDate, createdAt, updatedAt, isDeleted).mapTo[Order]
+    def * = (id, name, userId, expectedDeliveryDate, createdAt, updatedAt, isDeleted).mapTo[Order]
   }
 }

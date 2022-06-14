@@ -5,7 +5,7 @@ import graphql.types.ScalarTypes.SafeZonedDateTime
 import models.traits.Identifiable
 
 case class Order(
-                  id: Int,
+                  id: Int = 0,
                   name: String,
                   userId: Int,
                   expectedDeliveryDate: DateTime,

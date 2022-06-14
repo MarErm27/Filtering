@@ -6,7 +6,7 @@ import sangria.macros.derive.GraphQLExclude
 import akka.http.scaladsl.model.DateTime
 
 case class User(
-                 id: Int,
+                 id: Int = 0,
                  email: String,
                  @GraphQLExclude
                  password: Option[String] = None,

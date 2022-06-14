@@ -1,17 +1,21 @@
 package database.dao
 
 import database.tables.SalesTables
+import graphql.adapters.SlickFilter
+import models.Filtering
 import org.slf4j.LoggerFactory
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
 import types.{OrderId, UserId}
+
 import java.util.Date
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class OrderDAO @Inject()(@NamedDatabase("sales")
-                         protected val dbConfigProvider: DatabaseConfigProvider
+                         protected val dbConfigProvider: DatabaseConfigProvider,
+                         filter: SlickFilter
                         )(implicit executionContext: ExecutionContext)
   extends HasDatabaseConfigProvider[JdbcProfile] with SalesTables {
 
@@ -22,16 +26,26 @@ class OrderDAO @Inject()(@NamedDatabase("sales")
   def orders(ids: Seq[OrderId]) =
     db run OrderT.filter(_.id inSet ids).result
 
-  def orders(limit: Int, offset: Int, date: Option[Date])(filteredIds: Seq[Int]) = {
+  def orders(limit: Int, offset: Int, date: Option[Date], ids: Seq[Int]) = {
+    val baseQuery = OrderT.filter(_.id inSet ids)
     val query = for {
-      items <- OrderT
+      items <- baseQuery
         .drop(offset).take(limit)
         .result
-      count <- OrderT
+      count <- baseQuery
         .length
         .result
     } yield (items, count)
     db run query
+  }
+
+  def ordersWithFilters(limit: Int, offset: Int, date: Option[Date], filters: Vector[Filtering]) = {
+    val ids = filter.filter(filters, OrderT)
+    if (ids.isEmpty) {
+      Future((Seq[OrderTable#TableElementType](), 0))
+    } else {
+      orders(limit, offset, date, ids)
+    }
   }
 
   def ordersByUserID(ids: Seq[UserId]) = {

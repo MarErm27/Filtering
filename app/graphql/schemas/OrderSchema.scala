@@ -12,16 +12,10 @@ class OrderSchema @Inject()(
                              ordersDAOProvider: Provider[OrderDAO]
                            ) {
 
-  def filter(filters: Vector[Filtering]): Seq[Int] = {
-
-
-    Seq(1,2,3)
-  }
-
   val Queries: List[Field[GraphQLContext, Unit]] = List(
     Field("ordersCounts", OrdersWithCountType,
       arguments = List(Arguments.Limit, Arguments.Offset, Arguments.DateOpt, Argument("filters", ListInputType(FilteringInputType))),
-      resolve = c => ordersDAOProvider.get.orders(c.arg("limit"), c.arg("offset"), c.argOpt("date"))(filter(c.arg("filters"))),
+      resolve = c => ordersDAOProvider.get.ordersWithFilters(c.arg("limit"), c.arg("offset"), c.argOpt("date"), c.arg("filters")),
     ),
   )
 

@@ -5,6 +5,14 @@ import graphql.types.ScalarTypes.SafeZonedDateTime
 import models.{Order, User}
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.jdbc.JdbcProfile
+import models.Filtering
+import java.time.ZonedDateTime
+
+
+trait ByFiltering {
+  def id: slick.lifted.Rep[Int]
+  def byFiltering(filtering: Filtering): slick.lifted.Rep[Boolean]
+}
 
 trait SalesTables extends TableExt {
   this: HasDatabaseConfigProvider[JdbcProfile] =>
@@ -31,10 +39,19 @@ trait SalesTables extends TableExt {
 
     def isDeleted = column[Boolean]("is_deleted")
 
-    def * = (id, email, password, verified, birthdate, createdAt, updatedAt, isDeleted).mapTo[User]
+    def * = (
+      id,
+      email,
+      password,
+      verified,
+      birthdate,
+      createdAt,
+      updatedAt,
+      isDeleted
+    ).mapTo[User]
   }
 
-  class OrderTable(tag: Tag) extends Table[Order](tag, "order") {
+  class OrderTable(tag: Tag) extends Table[Order](tag, "order") with ByFiltering {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def name = column[String]("name")
@@ -49,6 +66,25 @@ trait SalesTables extends TableExt {
 
     def isDeleted = column[Boolean]("is_deleted")
 
-    def * = (id, name, userId, expectedDeliveryDate, createdAt, updatedAt, isDeleted).mapTo[Order]
+    def byFiltering(filtering: Filtering) = filtering match {
+      case Filtering("name", like, gt, lt, in) =>
+        like.fold[Rep[Boolean]](true)(name.like(_)) &&
+        gt.fold[Rep[Boolean]](true)(name > _) &&
+        lt.fold[Rep[Boolean]](true)(name < _) &&
+        in.fold[Rep[Boolean]](true)(name.inSet(_))
+      case Filtering("createdAt", like, gt, lt, in) =>
+        // like.fold[Rep[Boolean]](true)(createdAt.like(_)) &&
+        gt.fold[Rep[Boolean]](true) { string =>
+          createdAt.map(_ > SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
+        } &&
+        gt.fold[Rep[Boolean]](true) { string =>
+          createdAt.map(_ < SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
+        } /* &&
+        in.fold[Rep[Boolean]](true)(createdAt.inSet(_)) */
+    }
+
+    def * =
+      (id, name, userId, expectedDeliveryDate, createdAt, updatedAt, isDeleted)
+        .mapTo[Order]
   }
 }

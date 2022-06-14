@@ -13,11 +13,13 @@ import java.util.Date
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class OrderDAO @Inject()(@NamedDatabase("sales")
-                         protected val dbConfigProvider: DatabaseConfigProvider,
-                         filter: SlickFilter
-                        )(implicit executionContext: ExecutionContext)
-  extends HasDatabaseConfigProvider[JdbcProfile] with SalesTables {
+class OrderDAO @Inject() (
+    @NamedDatabase("sales")
+    protected val dbConfigProvider: DatabaseConfigProvider,
+    filter: SlickFilter
+)(implicit executionContext: ExecutionContext)
+    extends HasDatabaseConfigProvider[JdbcProfile]
+    with SalesTables {
 
   import profile.api._
 
@@ -30,22 +32,28 @@ class OrderDAO @Inject()(@NamedDatabase("sales")
     val baseQuery = OrderT.filter(_.id inSet ids)
     val query = for {
       items <- baseQuery
-        .drop(offset).take(limit)
+        .drop(offset)
+        .take(limit)
         .result
-      count <- baseQuery
-        .length
-        .result
+      count <- baseQuery.length.result
     } yield (items, count)
     db run query
   }
 
-  def ordersWithFilters(limit: Int, offset: Int, date: Option[Date], filters: Vector[Filtering]) = {
-    val ids = filter.filter(filters, OrderT)
-    if (ids.isEmpty) {
-      Future((Seq[OrderTable#TableElementType](), 0))
-    } else {
-      orders(limit, offset, date, ids)
-    }
+  def ordersWithFilters(
+      limit: Int,
+      offset: Int,
+      date: Option[Date],
+      filters: Vector[Filtering]
+  ) = {
+    db.run(filter.filter(filters, OrderT))
+      .flatMap { ids =>
+        if (ids.isEmpty) {
+          Future((Seq[OrderTable#TableElementType](), 0))
+        } else {
+          orders(limit, offset, date, ids)
+        }
+      }
   }
 
   def ordersByUserID(ids: Seq[UserId]) = {

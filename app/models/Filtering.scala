@@ -4,7 +4,7 @@ import sangria.marshalling.{CoercedScalaResultMarshaller, FromInput, ResultMarsh
 import util.extensions.MapExtensions._
 
 case class Filtering(
-                      id: String,
+                      field: String,
                       like: Option[String],
                       gt: Option[String],
                       lt: Option[String],

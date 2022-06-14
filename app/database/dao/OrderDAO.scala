@@ -22,7 +22,7 @@ class OrderDAO @Inject()(@NamedDatabase("sales")
   def orders(ids: Seq[OrderId]) =
     db run OrderT.filter(_.id inSet ids).result
 
-  def orders(limit: Int, offset: Int, date: Option[Date]) = {
+  def orders(limit: Int, offset: Int, date: Option[Date])(filteredIds: Seq[Int]) = {
     val query = for {
       items <- OrderT
         .drop(offset).take(limit)

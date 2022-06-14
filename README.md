@@ -42,6 +42,7 @@ PRIMARY KEY (`id`)
 
 CREATE TABLE `order` (
 `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(255)  NULL  DEFAULT NULL,
 `user_id` int(11) unsigned NULL  DEFAULT NULL,
 `expected_delivery_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 `created_at`  TIMESTAMP(6)     NULL     DEFAULT CURRENT_TIMESTAMP(6),
@@ -58,11 +59,12 @@ The first query for testing purposes:
 ```
 query  {
   ordersCounts(limit: 5, offset: 0, date: "1990-01-01", filters: {
-    id: "userInfo.email",
-    like: "w"
+    id: "name",
+    like: "yellow"
   }) {
     ordersList{
       id,
+      name,
       userId,
       expectedDeliveryDate,
       createdAt,

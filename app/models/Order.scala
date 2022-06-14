@@ -6,6 +6,7 @@ import models.traits.Identifiable
 
 case class Order(
                   id: Int,
+                  name: String,
                   userId: Int,
                   expectedDeliveryDate: DateTime,
                   createdAt: Option[SafeZonedDateTime],

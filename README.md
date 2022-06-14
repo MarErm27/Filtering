@@ -4,7 +4,6 @@ Filtering is a Scala GraphQL investigation project called upon to find out how t
 
 ## Libraries
 
-
 Play Framework: <https://www.playframework.com/documentation/2.8.x/Home>
 
 Play JSON: <https://www.playframework.com/documentation/2.8.x/ScalaJson>

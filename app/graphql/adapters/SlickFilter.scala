@@ -5,7 +5,7 @@ import models.Filtering
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 import play.db.NamedDatabase
 import slick.jdbc.JdbcProfile
-import slick.lifted.AbstractTable
+//import slick.lifted.AbstractTable
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext

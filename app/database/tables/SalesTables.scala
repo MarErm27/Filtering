@@ -6,13 +6,8 @@ import models.{Order, User}
 import play.api.db.slick.HasDatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 import models.Filtering
+
 import java.time.ZonedDateTime
-
-
-trait ByFiltering {
-  def id: slick.lifted.Rep[Int]
-  def byFiltering(filtering: Filtering): slick.lifted.Rep[Boolean]
-}
 
 trait SalesTables extends TableExt {
   this: HasDatabaseConfigProvider[JdbcProfile] =>
@@ -39,6 +34,14 @@ trait SalesTables extends TableExt {
 
     def isDeleted = column[Boolean]("is_deleted")
 
+    def byFiltering(filtering: Filtering) = filtering match {
+      case Filtering("email", like, gt, lt, in) =>
+        like.fold[Rep[Boolean]](true)(email.like(_)) &&
+          gt.fold[Rep[Boolean]](true)(email > _) &&
+          lt.fold[Rep[Boolean]](true)(email < _) &&
+          in.fold[Rep[Boolean]](true)(email.inSet(_))
+    }
+
     def * = (
       id,
       email,
@@ -48,7 +51,7 @@ trait SalesTables extends TableExt {
       createdAt,
       updatedAt,
       isDeleted
-    ).mapTo[User]
+      ).mapTo[User]
   }
 
   class OrderTable(tag: Tag) extends Table[Order](tag, "order") with ByFiltering {
@@ -69,18 +72,22 @@ trait SalesTables extends TableExt {
     def byFiltering(filtering: Filtering) = filtering match {
       case Filtering("name", like, gt, lt, in) =>
         like.fold[Rep[Boolean]](true)(name.like(_)) &&
-        gt.fold[Rep[Boolean]](true)(name > _) &&
-        lt.fold[Rep[Boolean]](true)(name < _) &&
-        in.fold[Rep[Boolean]](true)(name.inSet(_))
+          gt.fold[Rep[Boolean]](true)(name > _) &&
+          lt.fold[Rep[Boolean]](true)(name < _) &&
+          in.fold[Rep[Boolean]](true)(name.inSet(_))
       case Filtering("createdAt", like, gt, lt, in) =>
-        // like.fold[Rep[Boolean]](true)(createdAt.like(_)) &&
-        gt.fold[Rep[Boolean]](true) { string =>
-          createdAt.map(_ > SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
-        } &&
-        gt.fold[Rep[Boolean]](true) { string =>
-          createdAt.map(_ < SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
-        } /* &&
-        in.fold[Rep[Boolean]](true)(createdAt.inSet(_)) */
+        like.fold[Rep[Boolean]](true)(string =>
+          createdAt.map(_ === SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
+        ) &&
+          gt.fold[Rep[Boolean]](true) { string =>
+            createdAt.map(_ > SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
+          } &&
+          gt.fold[Rep[Boolean]](true) { string =>
+            createdAt.map(_ < SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
+          } &&
+          in.fold[Rep[Boolean]](true)(string =>
+            createdAt.map(_ inSet string.map(s => SafeZonedDateTime(ZonedDateTime.parse(s)))).getOrElse(false)
+          )
     }
 
     def * =

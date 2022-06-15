@@ -22,10 +22,10 @@ object Filtering {
   }
 
   def fromMap(map: Map[String, Any]): Filtering = Filtering(
-    map.s("id"),
+    map.s("field"),
     map.os("like"),
     map.os("gt"),
     map.os("lt"),
-    map.oss("in"),
+    map.oss("in")
   )
 }

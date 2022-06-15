@@ -70,6 +70,11 @@ trait SalesTables extends TableExt {
     def isDeleted = column[Boolean]("is_deleted")
 
     def byFiltering(filtering: Filtering) = filtering match {
+      case Filtering("userId.email", like, gt, lt, in) =>
+        like.fold[Rep[Boolean]](true)(email.like(_)) &&
+          gt.fold[Rep[Boolean]](true)(email > _) &&
+          lt.fold[Rep[Boolean]](true)(email < _) &&
+          in.fold[Rep[Boolean]](true)(email.inSet(_))
       case Filtering("name", like, gt, lt, in) =>
         like.fold[Rep[Boolean]](true)(name.like(_)) &&
           gt.fold[Rep[Boolean]](true)(name > _) &&

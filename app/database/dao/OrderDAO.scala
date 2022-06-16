@@ -28,6 +28,10 @@ class OrderDAO @Inject() (
   def orders(ids: Seq[OrderId]) =
     db run OrderT.filter(_.id inSet ids).result
 
+  def ordersByUserID(ids: Seq[UserId]) = {
+    db run OrderT.filter(_.userId inSet ids).result
+  }
+
   def orders(limit: Int, offset: Int, date: Option[Date], ids: Seq[Int]) = {
     val baseQuery = OrderT.filter(_.id inSet ids)
     val query = for {
@@ -49,14 +53,10 @@ class OrderDAO @Inject() (
     db.run(filter.filter(filters, OrderT))
       .flatMap { ids =>
         if (ids.isEmpty) {
-          Future((Seq[OrderTable#TableElementType](), 0))
+          Future((Seq(), 0))
         } else {
           orders(limit, offset, date, ids)
         }
       }
-  }
-
-  def ordersByUserID(ids: Seq[UserId]) = {
-    db run OrderT.filter(_.userId inSet ids).result
   }
 }

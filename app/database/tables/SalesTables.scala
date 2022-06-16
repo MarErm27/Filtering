@@ -17,7 +17,7 @@ trait SalesTables extends TableExt {
   val UserT = TableQuery[UserTable]
   val OrderT = TableQuery[OrderTable]
 
-  class UserTable(tag: Tag) extends Table[User](tag, "user") {
+  class UserTable(tag: Tag) extends Table[User](tag, "user") with ByFiltering {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def email = column[String]("email")
@@ -37,9 +37,9 @@ trait SalesTables extends TableExt {
     def byFiltering(filtering: Filtering) = filtering match {
       case Filtering("email", like, gt, lt, in) =>
         like.fold[Rep[Boolean]](true)(email.like(_)) &&
-          gt.fold[Rep[Boolean]](true)(email > _) &&
-          lt.fold[Rep[Boolean]](true)(email < _) &&
-          in.fold[Rep[Boolean]](true)(email.inSet(_))
+        gt.fold[Rep[Boolean]](true)(email > _) &&
+        lt.fold[Rep[Boolean]](true)(email < _) &&
+        in.fold[Rep[Boolean]](true)(email.inSet(_))
     }
 
     def * = (
@@ -51,10 +51,12 @@ trait SalesTables extends TableExt {
       createdAt,
       updatedAt,
       isDeleted
-      ).mapTo[User]
+    ).mapTo[User]
   }
 
-  class OrderTable(tag: Tag) extends Table[Order](tag, "order") with ByFiltering {
+  class OrderTable(tag: Tag)
+      extends Table[Order](tag, "order")
+      with ByFiltering {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
 
     def name = column[String]("name")
@@ -70,29 +72,39 @@ trait SalesTables extends TableExt {
     def isDeleted = column[Boolean]("is_deleted")
 
     def byFiltering(filtering: Filtering) = filtering match {
-      case Filtering("userId.email", like, gt, lt, in) =>
-        like.fold[Rep[Boolean]](true)(email.like(_)) &&
-          gt.fold[Rep[Boolean]](true)(email > _) &&
-          lt.fold[Rep[Boolean]](true)(email < _) &&
-          in.fold[Rep[Boolean]](true)(email.inSet(_))
+//      case Filtering("userId.email", like, gt, lt, in) =>
+//        like.fold[Rep[Boolean]](true)(email.like(_)) &&
+//          gt.fold[Rep[Boolean]](true)(email > _) &&
+//          lt.fold[Rep[Boolean]](true)(email < _) &&
+//          in.fold[Rep[Boolean]](true)(email.inSet(_))
       case Filtering("name", like, gt, lt, in) =>
         like.fold[Rep[Boolean]](true)(name.like(_)) &&
-          gt.fold[Rep[Boolean]](true)(name > _) &&
-          lt.fold[Rep[Boolean]](true)(name < _) &&
-          in.fold[Rep[Boolean]](true)(name.inSet(_))
+        gt.fold[Rep[Boolean]](true)(name > _) &&
+        lt.fold[Rep[Boolean]](true)(name < _) &&
+        in.fold[Rep[Boolean]](true)(name.inSet(_))
       case Filtering("createdAt", like, gt, lt, in) =>
         like.fold[Rep[Boolean]](true)(string =>
-          createdAt.map(_ === SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
+          createdAt
+            .map(_ === SafeZonedDateTime(ZonedDateTime.parse(string)))
+            .getOrElse(false)
         ) &&
-          gt.fold[Rep[Boolean]](true) { string =>
-            createdAt.map(_ > SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
-          } &&
-          gt.fold[Rep[Boolean]](true) { string =>
-            createdAt.map(_ < SafeZonedDateTime(ZonedDateTime.parse(string))).getOrElse(false)
-          } &&
-          in.fold[Rep[Boolean]](true)(string =>
-            createdAt.map(_ inSet string.map(s => SafeZonedDateTime(ZonedDateTime.parse(s)))).getOrElse(false)
-          )
+        gt.fold[Rep[Boolean]](true) { string =>
+          createdAt
+            .map(_ > SafeZonedDateTime(ZonedDateTime.parse(string)))
+            .getOrElse(false)
+        } &&
+        gt.fold[Rep[Boolean]](true) { string =>
+          createdAt
+            .map(_ < SafeZonedDateTime(ZonedDateTime.parse(string)))
+            .getOrElse(false)
+        } &&
+        in.fold[Rep[Boolean]](true)(string =>
+          createdAt
+            .map(
+              _ inSet string.map(s => SafeZonedDateTime(ZonedDateTime.parse(s)))
+            )
+            .getOrElse(false)
+        )
     }
 
     def * =

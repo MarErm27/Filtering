@@ -2,11 +2,10 @@ package graphql.schemas
 
 import com.google.inject.{Inject, Provider}
 import database.dao.OrderDAO
-import graphql.{Arguments, GraphQLContext}
-import sangria.schema.{Argument, Field, ListInputType}
 import graphql.types.input.FilterInputTypes._
 import graphql.types.output.OrderTypes.OrdersWithCountType
-import models.Filtering
+import graphql.{Arguments, GraphQLContext}
+import sangria.schema.{Argument, Field, ListInputType}
 
 class OrderSchema @Inject()(
                              ordersDAOProvider: Provider[OrderDAO]

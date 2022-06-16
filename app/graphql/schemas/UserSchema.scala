@@ -7,14 +7,23 @@ import graphql.types.output.UserTypes.UsersWithCountType
 import graphql.{Arguments, GraphQLContext}
 import sangria.schema.{Argument, Field, ListInputType}
 
-class UserSchema @Inject()(
-                            userDAOProvider: Provider[UserDAO],
-                          ) {
+class UserSchema @Inject() (
+    userDAOProvider: Provider[UserDAO]
+) {
   val Queries: List[Field[GraphQLContext, Unit]] = List(
-    Field("usersCounts", UsersWithCountType,
-      arguments = List(Arguments.Limit, Arguments.Offset, Arguments.DateOpt, Argument("filters", ListInputType(FilteringInputType))),
-      resolve = c => userDAOProvider.get.users(c.arg("limit"), c.arg("offset"), c.argOpt("date")),
-    ),
+    Field(
+      "usersCounts",
+      UsersWithCountType,
+      arguments = List(
+        Arguments.Limit,
+        Arguments.Offset,
+        Arguments.DateOpt,
+        Argument("filters", ListInputType(FilteringInputType))
+      ),
+      resolve = c =>
+        userDAOProvider.get
+          .users(c.arg("limit"), c.arg("offset"), c.argOpt("date"))
+    )
   )
 
   val Mutations: List[Field[GraphQLContext, Unit]] = List(

@@ -24,13 +24,16 @@ class SlickFilter @Inject() (
       filters: Vector[Filtering],
       query: Query[Row, _, Seq]
   ): DBIO[Seq[Int]] = {
-    query
-      .filter { table =>
-        filters.foldLeft[Rep[Boolean]](true)((accumulator, filter) =>
-          accumulator && table.byFiltering(filter)
-        )
-      }
-      .map(_.id)
-      .result
+    val result =
+      query
+        .filter { table =>
+          filters.foldLeft[Rep[Boolean]](true)((accumulator, filter) =>
+            accumulator && table.byFiltering(filter)
+          )
+        }
+        .map(_.id)
+        .result
+    println(result.statements.mkString)
+    result
   }
 }

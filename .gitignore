@@ -19,3 +19,4 @@ dist
 metals.sbt
 /.vscode
 application.local.conf
+/.docker

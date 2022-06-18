@@ -8,7 +8,7 @@ case class Filtering(
                       like: Option[String],
                       gt: Option[String],
                       lt: Option[String],
-                      in: Option[Seq[String]]
+                      in: Option[Vector[String]]
                     )
 
 object Filtering {
@@ -26,6 +26,6 @@ object Filtering {
     map.os("like"),
     map.os("gt"),
     map.os("lt"),
-    map.oss("in")
+    map.ovs("in")
   )
 }

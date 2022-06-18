@@ -45,8 +45,11 @@ object MapExtensions {
       map(key).asInstanceOf[ListMap[String, Any]]
     def ss(key: String): Seq[String] =
       map(key).asInstanceOf[Seq[String]]
-    def oss(key: String): Option[Seq[String]] =
-      map.get(key).asInstanceOf[Option[Seq[String]]]
+    def ovs(key: String): Option[Vector[String]] = {
+      val value = map.get(key)
+
+      map.get(key).asInstanceOf[Option[Vector[String]]]
+    }
     def si(key: String): Seq[Int] =
       map(key).asInstanceOf[Seq[Int]]
     def sl(key: String): Seq[ListMap[String, Any]] =

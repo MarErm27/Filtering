@@ -93,7 +93,7 @@ trait SalesTables extends TableExt {
             .map(_ > SafeZonedDateTime(ZonedDateTime.parse(string)))
             .getOrElse(false)
         } &&
-        gt.fold[Rep[Boolean]](true) { string =>
+          lt.fold[Rep[Boolean]](true) { string =>
           createdAt
             .map(_ < SafeZonedDateTime(ZonedDateTime.parse(string)))
             .getOrElse(false)
